@@ -2,7 +2,8 @@ FROM node:15.5.0-alpine3.12 as node
 FROM ruby:2.7.2-alpine3.12
 
 ENV APP_ROOT=/app \
-    LANG=ja-JP.UTF-8
+    LANG=ja-JP.UTF-8 \
+    TZ=Asia/Tokyo
 
 # RUN mkdir は WORKDIR で省略できる
 WORKDIR $APP_ROOT
@@ -27,11 +28,14 @@ RUN apk upgrade --no-cache && \
     ln -s /opt/yarn/bin/yarnpkg /usr/local/bin/yarnpkg && \
 # entrypoint.sh を作成する。gem、yarnの類をインストールする。
     echo $'#!/bin/sh \n\
+\n\
 bundle install --path=vendor/bundle -j4 \n\
 yarn \n\
 bundle exec rails webpacker:install \n\
 exec "$@" \n\
+\n\
 ' > /usr/local/bin/entrypoint.sh && \
     chmod u+x /usr/local/bin/entrypoint.sh
 
+ENTRYPOINT [ "entrypoint.sh" ]
 EXPOSE 3000

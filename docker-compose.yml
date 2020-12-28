@@ -5,12 +5,13 @@ services:
     build: .
     entrypoint: ["entrypoint.sh"] # bundler と yarn のパッケージを実行時にインストールする
     command: sh -c "rm -f tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0" # 最初はコマンド引数から rails new することで、プロジェクト作成前の rails s を上書きできる。
+    container_name: app
     environment:
-      - DB_HOST=${DB_HOST:-localhost} # デフォルト値付きの環境変数
-      - DB_DATABASE=${DB_DATABASE:-app}
-      - DB_USER=${DB_USERNAME:-root}
-      - DB_PASSWORD=${DB_PASSWORD:-password}
-      - DB_PORT=${DB_PORT:-3306}
+      - DB_HOST=localhost # デフォルト値付きの環境変数
+      - DB_DATABASE=app_local
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_PORT=3306
     volumes:
       - .:/app:cached # ホストへの反映の遅延を許容して高速化する
     volumes_from:
@@ -25,30 +26,32 @@ services:
     command: "bin/webpack-dev-server"
     volumes_from:
       - datastore
-    ports:
-      - "3035:3035"
+    expose:
+      - "3036"
     depends_on:
       - app
 
   db:
     image: mysql:8.0.22
     command: --default-authentication-plugin=mysql_native_password
+    container_name: db
     environment:
-      - MYSQL_DATABASE=${DB_DATABASE:-app}
-      - MYSQL_USER=${DB_USERNAME:-root}
-      - MYSQL_PASSWORD=${DB_PASSWORD:-password}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-password}
+      - MYSQL_DATABASE=app_local
+      - MYSQL_USER=app_root
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
     ports:
-      - "${DB_PORT}:3306"
+      - "3306:3306" # DBクライアント接続用にホストにも公開しておく
     volumes_from:
       - datastore
 
   datastore:
     image: alpine:3.12
+    container_name: datastore
     volumes:
       - mysql-data:/var/lib/mysql
       - vendor-bundle:/app/vendor/bundle
-      - dotbundle:/app/.bundle
+      - bundle:/app/.bundle
       - node_modules:/app/node_modules
 
 volumes:
@@ -56,7 +59,7 @@ volumes:
     driver: local
   vendor-bundle:
     driver: local
-  dotbundle:
+  bundle:
     driver: local
   node_modules:
     driver: local
