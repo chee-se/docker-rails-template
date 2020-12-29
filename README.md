@@ -4,7 +4,7 @@ my rails on docker template
 
 ## Versions
 
-- Docker Compose 3.7
+- Docker Compose 3.9
 - ruby 2.7.2
 - Ruby on Rails 6.1
 - MySQL 8.0.2
