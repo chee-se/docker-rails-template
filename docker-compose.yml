@@ -2,10 +2,13 @@ version: "3.7"
 
 services:
   app: &app_base
-    build: .
-    entrypoint: ["entrypoint.sh"] # bundler と yarn のパッケージを実行時にインストールする
+    build:
+      context: .
+      args:
+        - RUBY_VERSION=2.7.2
+        - NODE_VERSION=15.5.0
+        - ALPINE_VERSION=3.12 # 余計なイメージのダウンロードを避けるため、ALPINEのバージョンをそろえたい場合は指定する
     command: sh -c "rm -f tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0" # 最初はコマンド引数から rails new することで、プロジェクト作成前の rails s を上書きできる。
-    container_name: app
     environment:
       - DB_HOST=localhost # デフォルト値付きの環境変数
       - DB_DATABASE=app_local
@@ -34,7 +37,6 @@ services:
   db:
     image: mysql:8.0.22
     command: --default-authentication-plugin=mysql_native_password
-    container_name: db
     environment:
       - MYSQL_DATABASE=app_local
       - MYSQL_USER=app_root
@@ -47,7 +49,6 @@ services:
 
   datastore:
     image: alpine:3.12
-    container_name: datastore
     volumes:
       - mysql-data:/var/lib/mysql
       - vendor-bundle:/app/vendor/bundle

@@ -13,7 +13,8 @@ my rails on docker template
 ## Bootstrap
 
 ```shell
-$ docker-compose run --rm app bundle exec rails new --database=mysql .
+$ docker-compose run --rm app bundle exec rails new . --database=mysql -B
+$ docker-compose run --rm app bundle && yarn && bundle exec rails webpacker:install
 ```
 
 ## Boot server
