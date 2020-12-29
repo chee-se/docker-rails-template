@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.9"
 
 services:
   app: &app_base
@@ -7,14 +7,11 @@ services:
       args:
         - RUBY_VERSION=2.7.2
         - NODE_VERSION=15.5.0
-        - ALPINE_VERSION=3.12 # 余計なイメージのダウンロードを避けるため、ALPINEのバージョンをそろえたい場合は指定する
-    command: sh -c "rm -f tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0" # 最初はコマンド引数から rails new することで、プロジェクト作成前の rails s を上書きできる。
+        - ALPINE_VERSION=3.12 # 余計なイメージのダウンロードを避けるため、ALPINEのバージョンをそろえて高速化する
+    command: sh -c "rm -f tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0" # 最初はコマンド引数で rails new に上書する。
     environment:
-      - DB_HOST=localhost # デフォルト値付きの環境変数
-      - DB_DATABASE=app_local
-      - DB_USER=root
-      - DB_PASSWORD=password
-      - DB_PORT=3306
+      - DATABASE_URL=mysql2://app_root:password@db:3306/app_local # database.yml を無視して接続する
+      - WEBPACKER_DEV_SERVER_HOST=webpack # webpack への接続する
     volumes:
       - .:/app:cached # ホストへの反映の遅延を許容して高速化する
     volumes_from:

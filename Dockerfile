@@ -25,28 +25,23 @@ RUN ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn && \
     # gem インストール
     echo 'install: --no-document' > ~/.gemrc && \
     echo 'update: --no-document' >> ~/.gemrc && \
-    bundle config --path=vendor/bundle && \
     apk upgrade --no-cache && \
     apk add --no-cache \
-    # linux-headers \
-    # libxml2-dev \
-    # make \
-    # git \
-        # curl-dev \
-        mysql-client \
+        build-base \
         mysql-dev \
         tzdata && \
     rm -rf /usr/lib/libmysqld* && \
-    rm -rf /usr/bin/mysql*
+    rm -rf /usr/bin/mysql* && \
+    # entrypointでパッケージをインストールする。
+    # ビルド中にインストールするとボリュームがマウント前のため、毎回フルインストールになるので避ける
+    echo $'#!/bin/sh \n\
+bundle install -j4 --path=vendor/bundle && yarn && \n\
+exec "$@" \n\
+' > /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
 
-# Gemfile が変更された場合、ここからビルドしなおしになる
-# 最初にCOPYを済ませて一つのRUNですべて処理することもできるが、せいぜい0.1MBの節約にしかならない
+# Gemfile が変更された場合、ここからビルドし直しになる
 COPY Gemfile Gemfile.lock package.json yarn.lock ./
-
-# ビルド用パッケージはレイヤーキャッシュさせずにすぐに捨てる
-RUN apk add --no-cache --virtual build-dependencies \
-        build-base && \
-    bundle install -j4 && yarn && \
-    apk del build-dependencies
+ENTRYPOINT [ "entrypoint.sh" ]
 
 EXPOSE 3000
