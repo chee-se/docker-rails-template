@@ -16,7 +16,7 @@ WORKDIR $APP_ROOT
 
 # 結果が変わらなそうなものから先に実行する
 # ビルド済み node をコピー
-COPY --from=node /usr/local/bin/node /usr/local/bin/
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /opt/yarn-* /opt/yarn
 
 # node にシンボリックリンクを張る
@@ -33,15 +33,17 @@ RUN ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn && \
     rm -rf /usr/lib/libmysqld* && \
     rm -rf /usr/bin/mysql* && \
     # entrypointでパッケージをインストールする。
-    # ビルド中にインストールするとボリュームがマウント前のため、毎回フルインストールになるので避ける
+    # ビルド中はボリュームがマウントされていないため、毎回フルインストールになるので避ける
     echo $'#!/bin/sh \n\
-bundle install -j4 --path=vendor/bundle && yarn && \n\
+echo "installing gems..."\n\
+bundle install -j4 --path=vendor/bundle --quiet\n\
+echo "installing yarn packages..."\n\
+yarn install --silent \n\
+echo "starting container entrypoint..."\n\
 exec "$@" \n\
 ' > /usr/local/bin/entrypoint.sh && \
     chmod +x /usr/local/bin/entrypoint.sh
 
-# Gemfile が変更された場合、ここからビルドし直しになる
-COPY Gemfile Gemfile.lock package.json yarn.lock ./
 ENTRYPOINT [ "entrypoint.sh" ]
 
 EXPOSE 3000
