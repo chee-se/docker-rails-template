@@ -29,7 +29,8 @@ RUN ln -s /opt/yarn/bin/yarn /usr/local/bin/yarn && \
     apk add --no-cache \
         build-base \
         mysql-dev \
-        tzdata && \
+        tzdata \
+        git && \
     rm -rf /usr/lib/libmysqld* && \
     rm -rf /usr/bin/mysql* && \
     # entrypointでパッケージをインストールする。
