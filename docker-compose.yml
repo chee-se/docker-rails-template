@@ -24,9 +24,8 @@ services:
   webpack:
     <<: *app_base
     command: "bin/webpack-dev-server"
-    ports: [] # app から継承した属性を上書きする
-    expose:
-      - "3036"
+    ports:
+      - "3035:3035"
     depends_on:
       - app
 
