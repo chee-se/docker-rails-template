@@ -11,7 +11,7 @@ services:
     command: sh -c "rm -f tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0" # 最初はコマンド引数で rails new に上書する。
     environment:
       - DATABASE_URL=mysql2://app_root:password@db:3306/app_local # database.yml を無視して接続する
-      - WEBPACKER_DEV_SERVER_HOST=webpack # webpack ホストの設定
+      - WEBPACKER_DEV_SERVER_HOST=webpack # app コンテナから見た webpack ホストの設定
     volumes:
       - .:/app:cached # ホストへの反映の遅延を許容して高速化する
     volumes_from:
@@ -24,9 +24,10 @@ services:
   webpack:
     <<: *app_base
     command: "bin/webpack-dev-server"
-    ports: [] # app から継承した属性を上書きする
-    expose:
-      - "3036"
+    environment:
+      - WEBPACKER_DEV_SERVER_HOST=0.0.0.0 # ブラウザに対する公開ホスト名
+    ports:
+      - "3035:3035"
     depends_on:
       - app
 

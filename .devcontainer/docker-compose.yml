@@ -32,6 +32,9 @@ services:
     #   - SYS_PTRACE
     # security_opt:
     #   - seccomp:unconfined
-
+    ports:
+      - "26162:26162"
+      - "3000:3000"
+      - "1234:1234"
     # Overrides default command so things don't shut down after the process ends.
-    command: /bin/sh -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0' ; while sleep 1000; do :; done"
+    command: /bin/sh -c "rm -f tmp/pids/server.pid && bundle exec rdebug-ide --host 0.0.0.0 --port 1234 --dispatcher-port 26162 -- bin/rails s -b 0.0.0.0 -p 3000 ; while sleep 1000; do :; done"
