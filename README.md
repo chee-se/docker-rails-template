@@ -12,18 +12,16 @@ my rails on docker template
 
 ## Bootstrap
 
-1. execute command below ( avoid server start before pacakge install )
+1. execute command below ( update gems )
 
 ```shell
-docker-compose run --rm --no-deps app bundle exec rails new . --database=mysql -B
+docker-compose run --rm --no-deps app bundle update && yarn upgrade
 ```
 
-and overwrite only Gemfile and package.json
-
-2. execute command below ( install new Gemfile and package.json, then install webpacker )
+1. execute command below ( generate credentials )
 
 ```shell
-docker-compose run --rm --no-deps app bundle exec rails webpacker:install
+docker-compose run --rm --no-deps app EDITOR="vi" bundle exec rails bin/rails credentials:edit
 ```
 
 ## Boot server
